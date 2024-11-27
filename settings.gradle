@@ -1,4 +1,55 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("dependency/libs.versions.toml"))
+        }
+    }
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven {
+            url 'https://api.mapbox.com/downloads/v2/releases/maven'
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = 'mapbox'
+                password = 'sk.eyJ1IjoiYTg2MTY4MzA3OCIsImEiOiJjbDU2NjhmdmEwcTRjM2RxZmdweWhzem9rIn0.rk__U0jRWTyctnmrXH0tgg'
+            }
+        }
+        maven {
+            allowInsecureProtocol = true
+            url POM_URL
+            credentials {
+                username POM_USER
+                password POM_PWD
+            }
+        }
+        maven { url "https://maven.aliyun.com/repository/jcenter" }
+    }
+}
+
+rootProject.name = "AppUpdater"
+
 include 'app-updater'
+include 'app-updater-v2'
 include 'main'
   
 
