@@ -46,7 +46,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AppUpdater"
+rootProject.name = "AppUpdaterV2"
 
 include 'app-updater'
 include 'app-updater-v2'

@@ -3,8 +3,11 @@ package com.king.app.updater
 import android.content.Context
 import com.king.app.updater.callback.UpdateCallback
 import com.king.app.updater.http.OkHttpManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 
 val appUpdaterExecutor: AppUpdaterExecutor by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -13,7 +16,9 @@ val appUpdaterExecutor: AppUpdaterExecutor by lazy(mode = LazyThreadSafetyMode.S
 
 sealed class UpdateStatus {
     data class Downloading(val isDownloading: Boolean) : UpdateStatus()
-    data class Progress(val progress: Long, val total: Long, val isChanged: Boolean) : UpdateStatus()
+    data class Progress(val progress: Long, val total: Long, val isChanged: Boolean) :
+        UpdateStatus()
+
     data class Finish(val file: File?) : UpdateStatus()
     data class Error(val exception: Exception?) : UpdateStatus()
 }
@@ -34,22 +39,27 @@ class AppUpdaterExecutor : UpdateCallback {
 
     private var mAppUpdater: AppUpdater? = null
 
-    fun start(url: String,fileName:String="update.apk",path:String="",appContext: Context): Boolean {
+    fun start(
+        url: String,
+        fileName: String = "update.apk",
+        path: String = "",
+        appContext: Context
+    ): Boolean {
         return if (isDownloading) {
             true
         } else {
             this.fileName = fileName
             this.path = path
-            startDownload(url,appContext)
+            startDownload(url, appContext)
             false
         }
     }
 
-    fun getDownloadStatus():Boolean{
+    fun getDownloadStatus(): Boolean {
         return isDownloading
     }
 
-    private fun startDownload(url: String,appContext: Context) {
+    private fun startDownload(url: String, appContext: Context) {
         this.downloadUrl = url
         mAppUpdater = AppUpdater.Builder(appContext)
             .setFilename(fileName)
@@ -71,20 +81,28 @@ class AppUpdaterExecutor : UpdateCallback {
 
     override fun onDownloading(isDownloading: Boolean) {
         this.isDownloading = isDownloading
-        _updateStatus.value = UpdateStatus.Downloading(isDownloading)
+        CoroutineScope(Dispatchers.IO).launch {
+            _updateStatus.emit(UpdateStatus.Downloading(isDownloading))
+        }
     }
 
     override fun onProgress(progress: Long, total: Long, isChanged: Boolean) {
-        _updateStatus.value = UpdateStatus.Progress(progress, total, isChanged)
+        CoroutineScope(Dispatchers.IO).launch {
+            _updateStatus.emit(UpdateStatus.Progress(progress, total, isChanged))
+        }
     }
 
     override fun onFinish(file: File?) {
-        _updateStatus.value = UpdateStatus.Finish(file)
+        CoroutineScope(Dispatchers.IO).launch {
+            _updateStatus.emit(UpdateStatus.Finish(file))
+        }
         this.isDownloading = false
     }
 
     override fun onError(error: java.lang.Exception?) {
-        _updateStatus.value = UpdateStatus.Error(error)
+        CoroutineScope(Dispatchers.IO).launch {
+            _updateStatus.emit(UpdateStatus.Error(error))
+        }
         this.isDownloading = false
     }
 

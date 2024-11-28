@@ -82,7 +82,15 @@ public class NotificationUtils {
      * @param progress
      * @param size
      */
+    private static long lastProgressUpdateTime = 0L;
+    private static long updateInterval = 500;
+
     public static void showProgressNotification(Context context, int notifyId, String channelId, @DrawableRes int smallIcon, CharSequence title, CharSequence content, int progress, int size, boolean isSupportCancelDownload) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastProgressUpdateTime < updateInterval) {
+            return;
+        }
+        lastProgressUpdateTime = currentTime;
         NotificationCompat.Builder builder = buildNotification(context, channelId, smallIcon, title, content, progress, size);
         // 如果支持取消下载，点击通知栏时，则取消下载
         if (isSupportCancelDownload) {
