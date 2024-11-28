@@ -1,4 +1,8 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+}
 
 android {
     namespace 'com.king.app.updater'
@@ -26,6 +30,10 @@ android {
         abortOnError false
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
     packagingOptions {
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
@@ -38,6 +46,9 @@ dependencies {
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidExtJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espressoCore"
+    compileOnly dependenciesList.Kotlin
+    compileOnly dependenciesList.CoreKtx
+    compileOnly dependenciesList.LifecycleLivedataKtx
     compileOnly dependenciesList.Appcompat
     compileOnly dependenciesList.Okhttp3
 }
